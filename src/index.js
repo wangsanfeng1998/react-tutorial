@@ -2,23 +2,31 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
-class Square extends React.Component {
-	// constructor(props) {
-	// 	super(props);
-	// 	this.state = {
-	// 		value: null,
-	// 	};
-	// }
+// class Square extends React.Component {
+// 	// constructor(props) {
+// 	// 	super(props);
+// 	// 	this.state = {
+// 	// 		value: null,
+// 	// 	};
+// 	// }
 
-  render() {
-    return (
-      <button className="square" onClick={() => 
-      	this.props.onClick() &&
-      	alert('You clicked on square ' + this.props.value)}>
-        {this.props.value}
-      </button>
-    );
-  }
+//   render() {
+//     return (
+//       <button className="square" onClick={() => 
+//       	this.props.onClick() &&
+//       	alert('You clicked on square ' + this.props.value)}>
+//         {this.props.value}
+//       </button>
+//     );
+//   }
+// }
+
+function Square(props) {
+	return (
+		<button className="square" onClick={props.onClick}>
+			{props.value}
+		</button>
+		);
 }
 
 class Board extends React.Component {
@@ -27,6 +35,7 @@ class Board extends React.Component {
 		super(props);
 		this.state = {
 			squares: Array(9).fill(null),
+			xNext: true,
 		};
 	}
 
@@ -41,12 +50,26 @@ class Board extends React.Component {
 
   handleClick(i) {
   	const newSquares = this.state.squares.slice();
-  	newSquares[i] = 'X';
-  	this.setState({squares: newSquares})
+  	if (calculateWinner(squares) || squares[i]) {
+  		return;
+  	}
+  	newSquares[i] = this.state.xNext ? 'X' : 'O';
+  	this.setState({
+  		squares: newSquares,
+  		xNext: !this.state.xNext,
+  	})
   }
 
   render() {
-    const status = 'Next player: X';
+  	const winner = calculateWinner(this.state.squares);
+
+  	let status; //need to declare status only so we don't have to declare it in each if branch
+
+  	if (winner) {
+  		status = 'Winner: ' + winner;
+  	} else {
+  		status = 'Next player: ' + (this.state.xNext? 'X' : 'O');
+  	}
 
     return (
       <div>
@@ -69,6 +92,27 @@ class Board extends React.Component {
       </div>
     );
   }
+}
+
+function calculateWinner(squares) {
+	const lines = [
+		[0, 1, 2],
+		[3, 4, 5],
+		[6, 7, 8],
+		[0, 3, 6],
+		[1, 4, 7],
+		[2, 5, 8],
+		[0, 4, 8],
+		[2, 4, 6],
+	];
+
+	for (let i = 0; i < lines.length; i++) {
+		const [a, b, c] = lines[i];
+		if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+			return squares[a];
+		}
+	}
+	return null;
 }
 
 class Game extends React.Component {
